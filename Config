@@ -1,0 +1,108 @@
+#       Configuration file for the Sedov explosion problem
+#       (Sedov, L. I., 1959, Similarity and Dimensional Methods
+#       in Mechanics [New York:  Academic])
+
+DATAFILES *.dat
+
+PPDEFINE HIDE_SANITIZE
+#PPDEFINE DEBUG_EOS
+
+REQUIRES Driver
+REQUIRES physics/Hydro
+REQUIRES physics/Eos/EosMain/Helmholtz/SpeciesBased2
+REQUIRES Simulation/SimulationComposition
+REQUIRES Multispecies
+REQUIRES physics/sourceTerms/Burn/BurnMain/nuclearBurn/
+#REQUIRES physics/sourceTerms/Cool
+REQUIRES flashUtilities/numericalRecipes
+
+USESETUPVARS withParticles
+
+IF withParticles
+   PARTICLETYPE passive INITMETHOD custom MAPMETHOD quadratic
+   REQUIRES Particles/ParticlesMain
+   REQUESTS Particles/ParticlesMapping/Quadratic
+   REQUESTS Particles/ParticlesInitialization
+   REQUESTS IO/IOMain/
+   REQUESTS IO/IOParticles
+   PARTICLEPROP dens REAL
+   PARTICLEMAP TO dens FROM VARIABLE dens
+   PARTICLEPROP temp REAL
+   PARTICLEMAP TO temp FROM VARIABLE temp
+   PARTICLEPROP pres REAL
+   PARTICLEMAP TO pres FROM VARIABLE pres
+ENDIF
+
+#REQUIRES physics/Gravity/GravityMain/PointMass
+#REQUIRES Grid/GridSolvers/Multipole
+
+PPDEFINE MULTIPOLE
+REQUIRES physics/Gravity/GravityMain/Poisson/Multipole
+
+#PPDEFINE MULTIGRID
+#REQUIRES physics/Gravity/GravityMain/Poisson/Multigrid
+
+IF withParticles
+   REQUIRES Particles/ParticlesMain
+   REQUIRES Particles/ParticlesMapping
+   REQUIRES Particles/ParticlesInitialization/Lattice
+   REQUESTS IO/IOMain/
+   REQUESTS IO/IOParticles
+ENDIF
+
+#PARAMETER gamma            REAL    1.66667E0
+PARAMETER refine_val_cutoff_1 REAL 0.E0
+PARAMETER refine_val_cutoff_2 REAL 0.E0
+PARAMETER refine_val_cutoff_3 REAL 0.E0
+PARAMETER refine_val_cutoff_4 REAL 0.E0
+PARAMETER sim_tAmbient     REAL    1.E6
+
+D sim_rhoAmbient     Initial ambient density
+PARAMETER sim_rhoAmbient   REAL    1.
+
+D sim_nsubzones       Number of `sub-zones' in cells for applying 1d profile
+PARAMETER sim_nsubzones     INTEGER 7
+PARAMETER sim_profileSubdiv REAL    1.0E5
+
+PARAMETER sim_xctr         REAL 0.5E0
+PARAMETER sim_yctr         REAL 0.5E0
+PARAMETER sim_zctr         REAL 0.5E0
+PARAMETER sim_tRelax       REAL 0.0E0
+PARAMETER sim_tSpinup      REAL 0.0E0
+PARAMETER sim_tExplode     REAL 0.0E0
+PARAMETER sim_relaxRate    REAL 1.0E0
+PARAMETER sim_accMass      REAL 0.0E0
+PARAMETER sim_accTemp      REAL 0.0E0
+PARAMETER sim_torusMass    REAL 0.0E0
+PARAMETER sim_virTemp      REAL 0.0E0
+PARAMETER sim_rotFac       REAL 0.0E0
+PARAMETER sim_massAcc      REAL 1.0E-3
+PARAMETER sim_minProfDelta REAL 0.98E0
+PARAMETER sim_maxProfDelta REAL 0.95E0
+PARAMETER sim_rhoGuess     REAL 0.0E0
+PARAMETER sim_axisRatio    REAL 0.0E0
+PARAMETER sim_maxBlocks    INTEGER 400
+PARAMETER sim_detDens      REAL 0.0E0
+PARAMETER sim_detTemp      REAL 0.0E0
+PARAMETER sim_detRadius    REAL 0.0E0
+PARAMETER sim_critDens     REAL 0.0E0
+PARAMETER sim_critKine     REAL 0.0E0
+PARAMETER sim_dbleDetTemp  REAL 0.0E0
+PARAMETER sim_explodeCore  BOOLEAN false
+
+PARAMETER larget           REAL 1.0E10
+
+PARAMETER plot_var_13 STRING "none"
+PARAMETER plot_var_14 STRING "none"
+PARAMETER plot_var_15 STRING "none"
+PARAMETER plot_var_16 STRING "none"
+PARAMETER plot_var_17 STRING "none"
+PARAMETER plot_var_18 STRING "none"
+PARAMETER plot_var_19 STRING "none"
+PARAMETER plot_var_20 STRING "none"
+PARAMETER plot_var_21 STRING "none"
+PARAMETER plot_var_22 STRING "none"
+
+PARAMETER grv_outdsfac     REAL 0.0E0
+
+PARAMETER pt_numParticlesWanted INTEGER  1000
