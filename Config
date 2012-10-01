@@ -9,7 +9,7 @@ PPDEFINE HIDE_SANITIZE
 
 REQUIRES Driver
 REQUIRES physics/Hydro
-REQUIRES physics/Eos/EosMain/Helmholtz/SpeciesBased2
+REQUIRES physics/Eos/EosMain/Helmholtz/SpeciesBased
 REQUIRES Simulation/SimulationComposition
 REQUIRES Multispecies
 REQUIRES physics/sourceTerms/Burn/BurnMain/nuclearBurn/
@@ -37,7 +37,7 @@ ENDIF
 #REQUIRES Grid/GridSolvers/Multipole
 
 PPDEFINE MULTIPOLE
-REQUIRES physics/Gravity/GravityMain/Poisson/Multipole
+REQUIRES physics/Gravity/GravityMain/Poisson/Multipole_experimental
 
 #PPDEFINE MULTIGRID
 #REQUIRES physics/Gravity/GravityMain/Poisson/Multigrid

@@ -2,6 +2,7 @@
 Simulation += Simulation_data.o profile_helmholtz.o nr.o nrutil.o nrtype.o newt.o fdjac.o ludcmp.o lubksb.o fmin.o lnsrch.o sim_newt_functions.o
 
 Gravity += Gravity_sendOutputData.o
+IO_updateScalars.o : Gravity_sendOutputData.o
 
 Simulation_init.o : Simulation_data.o sim_newt_functions.o
 Simulation_initBlock.o : Simulation_data.o
