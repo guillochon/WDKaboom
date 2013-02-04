@@ -94,6 +94,7 @@ subroutine Simulation_init()
     call RuntimeParameters_get('sim_critKine',sim_critKine)
     call RuntimeParameters_get('sim_dbleDetTemp',sim_dbleDetTemp)
     call RuntimeParameters_get('sim_explodeCore',sim_explodeCore)
+    call RuntimeParameters_get('sim_detHeight',sim_detHeight)
 
     if (sim_nSubZones .le. 1) sim_nSubZones = 2
 

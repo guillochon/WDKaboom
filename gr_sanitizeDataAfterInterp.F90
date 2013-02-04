@@ -62,12 +62,13 @@
 !!
 !!***
 
+!!REORDER(5): unk
+
 #define DEBUG_CONSCONV
 
 subroutine gr_sanitizeDataAfterInterp(blkList,count, info, layers)
 
-  use Grid_data, ONLY : gr_smallrho,gr_smalle
-  use Grid_interface, ONLY : Grid_getMyPE
+  use Grid_data, ONLY : gr_smallrho,gr_smalle, gr_meshMe
   use Logfile_interface, ONLY : Logfile_stamp
   use physicaldata, ONLY:unk, gcell_on_cc
   use tree, ONLY:nodetype
@@ -85,16 +86,16 @@ subroutine gr_sanitizeDataAfterInterp(blkList,count, info, layers)
   integer,dimension(MDIM), intent(IN):: layers
   integer :: n, block
 
-  integer :: myPe, i,j
+  integer ::  i,j
   integer :: iskip, jskip, kskip
   integer :: il,iu,jl,ju,kl,ku
   character(len=32), dimension(4,2) :: block_buff
   character(len=32)                 :: number_to_str
-  
+
 #ifndef HIDE_SANITIZE
 
 111 format (a,a,a1,(1x,a18,'=',a),(1x,a2,'=',a5),(1x,a5,'=',a),(1x,a4,'=',a))
-112 format (i3,1x,16(1x,1PG8.2))
+112 format (i3,1x,16(1x,1G8.2))
 
   iskip = NGUARD - layers(IAXIS)
   jskip = (NGUARD - layers(JAXIS)) * K2D
@@ -106,7 +107,6 @@ subroutine gr_sanitizeDataAfterInterp(blkList,count, info, layers)
   kl = kl_bnd + kskip
   ku = ku_bnd - kskip
 
-  call Grid_getMyPE(myPe)
 
   do n = 1,count
      block=blkList(n)
@@ -121,7 +121,7 @@ subroutine gr_sanitizeDataAfterInterp(blkList,count, info, layers)
            write (block_buff(1,2), '(a)') trim(adjustl(number_to_str))
 
            write (block_buff(2,1), '(a)') 'PE'
-           write (number_to_str, '(i7)') myPe
+           write (number_to_str, '(i7)') gr_meshMe
            write (block_buff(2,2), '(a)') trim(adjustl(number_to_str))
 
            write (block_buff(3,1), '(a)') 'block'
@@ -132,7 +132,7 @@ subroutine gr_sanitizeDataAfterInterp(blkList,count, info, layers)
            write (number_to_str, '(i7)') nodetype(block)
            write (block_buff(4,2), '(a)') trim(adjustl(number_to_str))
 
-           call Logfile_stamp(myPe, block_buff, 4, 2, 'WARNING '//info)
+           call Logfile_stamp( block_buff, 4, 2, 'WARNING '//info)
            print 111, 'WARNING ',info,':', ((block_buff(i,j),j=1,2),i=1,4)
 #ifdef DEBUG_CONSCONV
            ! For 2D, this prints a slice at the lowest k index that is interior - KW
@@ -140,8 +140,10 @@ subroutine gr_sanitizeDataAfterInterp(blkList,count, info, layers)
               print 112, j, (unk(DENS_VAR,i,j,kl_bndi,block), i=il_bnd,iu_bnd)
            end do
 #endif
+  !        call Driver_abortFlash("DENS var exceeding acceptable range")
         end if
      end if
+     
 #endif
 
 #ifdef ENER_VAR               
@@ -153,7 +155,7 @@ subroutine gr_sanitizeDataAfterInterp(blkList,count, info, layers)
            write (block_buff(1,2), '(a)') trim(adjustl(number_to_str))
 
            write (block_buff(2,1), '(a)') 'PE'
-           write (number_to_str, '(i7)') myPe
+           write (number_to_str, '(i7)') gr_meshMe
            write (block_buff(2,2), '(a)') trim(adjustl(number_to_str))
 
            write (block_buff(3,1), '(a)') 'block'
@@ -164,13 +166,14 @@ subroutine gr_sanitizeDataAfterInterp(blkList,count, info, layers)
            write (number_to_str, '(i7)') nodetype(block)
            write (block_buff(4,2), '(a)') trim(adjustl(number_to_str))
 
-           call Logfile_stamp(myPe, block_buff, 4, 2, 'WARNING '//info)
+           call Logfile_stamp( block_buff, 4, 2, 'WARNING '//info)
            print 111, 'WARNING ',info,':', ((block_buff(i,j),j=1,2),i=1,4)
 #ifdef DEBUG_CONSCONV
            do j=ju_bnd,jl_bnd,-1
               print 112, j, (unk(ENER_VAR,i,j,kl_bndi,block), i=il_bnd,iu_bnd) 
            end do
 #endif
+!call Driver_abortFlash("ENER var exceeding acceptable range")
         end if
      end if
 #endif
@@ -182,7 +185,7 @@ subroutine gr_sanitizeDataAfterInterp(blkList,count, info, layers)
            write (block_buff(1,2), '(a)') trim(adjustl(number_to_str))
 
            write (block_buff(2,1), '(a)') 'PE'
-           write (number_to_str, '(i7)') myPe
+           write (number_to_str, '(i7)') gr_meshMe
            write (block_buff(2,2), '(a)') trim(adjustl(number_to_str))
 
            write (block_buff(3,1), '(a)') 'block'
@@ -193,13 +196,14 @@ subroutine gr_sanitizeDataAfterInterp(blkList,count, info, layers)
            write (number_to_str, '(i7)') nodetype(block)
            write (block_buff(4,2), '(a)') trim(adjustl(number_to_str))
 
-           call Logfile_stamp(myPe, block_buff, 4, 2, 'WARNING '//info)
+           call Logfile_stamp( block_buff, 4, 2, 'WARNING '//info)
            print 111, 'WARNING ',info,':', ((block_buff(i,j),j=1,2),i=1,4)
 #ifdef DEBUG_CONSCONV
            do j=ju_bnd,jl_bnd,-1
               print 112, j, (unk(EINT_VAR,i,j,kl_bndi,block), i=il_bnd,iu_bnd) 
            end do
 #endif
+ !          call Driver_abortFlash("EINT var exceeding acceptable range")
         end if
      end if
 #endif
