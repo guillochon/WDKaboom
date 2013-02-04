@@ -309,8 +309,8 @@ subroutine hydro_1d (blockID,numIntCells,numCells, guard,bcs,        &
 
        do i = 1,numIntCells8
           dg       = dtfac*(grav(i) - ograv(i))
-          hgrav(i) = grav(i) + 0.5e0*dg
-          ngrav(i) = grav(i) +       dg
+          hgrav(i) = grav(i)! + 0.5e0*dg
+          ngrav(i) = grav(i)! +       dg
        enddo
 
 #else

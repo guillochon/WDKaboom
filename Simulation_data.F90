@@ -55,7 +55,7 @@ module Simulation_data
   double precision, save    :: core_xn(SPECIES_BEGIN:SPECIES_END)
   double precision, save    :: torus_xn(SPECIES_BEGIN:SPECIES_END)
   double precision, save    :: p_des, s_des
-  integer, save             :: ipos(ns), core_pos, sim_maxBlocks
+  integer, save             :: ipos(ns), core_pos, sim_maxBlocks, sim_detHeight
   logical, save             :: exploded, sim_explodeCore
 
 end module Simulation_data

@@ -38,7 +38,7 @@ subroutine Driver_sourceTerms(blockCount, blockList, dt)
     use Simulation_data, ONLY: sim_smallX, sim_rhoAmbient, sim_tRelax, wd_radius, sim_accTemp, rhop, &
         sim_tInitial, ipos, sim_accMass, sim_relaxRate, radius, m, exploded, sim_tExplode, core_pos, &
         sim_rotFac, sim_tSpinup, core_xn, torus_xn, sim_detDens, sim_detTemp, sim_detRadius, &
-        sim_critDens, sim_critKine, sim_explodeCore, sim_dbleDetTemp
+        sim_critDens, sim_critKine, sim_explodeCore, sim_dbleDetTemp, sim_detHeight
     use Grid_interface, ONLY : Grid_getBlkIndexLimits, Grid_getBlkPtr, Grid_releaseBlkPtr,&
         Grid_getCellCoords, Grid_putPointData, Grid_getMinCellSize, Grid_getMyPE
     use Eos_interface, ONLY : Eos_wrapped, Eos
@@ -182,9 +182,9 @@ subroutine Driver_sourceTerms(blockCount, blockList, dt)
                             !else
                             !    solnData(SPECIES_BEGIN:SPECIES_END,i,j,k) = torus_xn
                             !endif
-                            if (.not. (solnData(HE4_SPEC,i,j,k) .lt. 0.5d0) .and. &
-                                .not. (minval(solnData(HE4_SPEC,i,j+1:j+2,k)) .gt. 0.5d0) .and. &
-                                .not. (sqrt((xCoord(i) - Xcm)**2.d0 + (zCoord(k) - Zcm)**2.d0) .gt. sim_detRadius*mcs)) then
+                            if ((solnData(HE4_SPEC,i,j,k) .ge. 0.5d0) .and. &
+                                (minval(solnData(HE4_SPEC,i,j+sim_detHeight:j+sim_detHeight+1,k)) .le. 0.5d0) .and. &
+                                (sqrt((xCoord(i) - Xcm)**2.d0 + (zCoord(k) - Zcm)**2.d0) .le. sim_detRadius*mcs)) then
                                 solnData(DENS_VAR,i,j,k) = sim_detDens
                                 solnData(TEMP_VAR,i,j,k) = sim_detTemp
                             endif
