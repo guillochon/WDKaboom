@@ -7,7 +7,7 @@
 !!
 !! SYNOPSIS
 !!
-!!  Simulation_init()
+!!  Simulation_init(integer(IN) :: myPE)
 !!
 !! DESCRIPTION
 !!
@@ -15,6 +15,8 @@
 !!  It calls RuntimeParameters_get rotuine for initialization.
 !!
 !! ARGUMENTS
+!!
+!!   myPE -   current processor number
 !!
 !! PARAMETERS
 !!
@@ -27,7 +29,7 @@
 !!
 !!***
 
-subroutine Simulation_init()
+subroutine Simulation_init(myPE)
 
     use Simulation_data 
     use Driver_data, ONLY : dr_restart, dr_simTime
@@ -36,7 +38,6 @@ subroutine Simulation_init()
     use Grid_interface, ONLY : Grid_getMinCellSize
     use newt_wrappers
     use sim_newt_functions
-    use Grid_data, ONLY : gr_meshMe
 
     implicit none
 
@@ -44,6 +45,7 @@ subroutine Simulation_init()
 #include "Flash.h"
 #include "Flash_mpi.h"
 
+    integer, intent(in) :: myPE
     integer             :: i, j, k, ierr, istat, ii, jj, kk, gdim, jLo, jHi, n, cnt, tLo, tHi
     double precision    :: start_t, rho0, rho1, wd_mass_tot, old_mass_tot, min_grid, &
                            sumRho, mcell, xx, yy, zz, cdist, cth, &
@@ -94,7 +96,6 @@ subroutine Simulation_init()
     call RuntimeParameters_get('sim_critKine',sim_critKine)
     call RuntimeParameters_get('sim_dbleDetTemp',sim_dbleDetTemp)
     call RuntimeParameters_get('sim_explodeCore',sim_explodeCore)
-    call RuntimeParameters_get('sim_detHeight',sim_detHeight)
 
     if (sim_nSubZones .le. 1) sim_nSubZones = 2
 
@@ -110,13 +111,13 @@ subroutine Simulation_init()
     torus_xn(HE4_SPEC) = 1.d0
 
     if (sim_rhoGuess .eq. 0.0d0) then
-        if (gr_meshMe .eq. MASTER_PE) then
-            call Logfile_stampMessage('[Simulation Init] Guessing Central Density')
+        if (myPE .eq. MASTER_PE) then
+            call Logfile_stampMessage(myPE,'[Simulation Init] Guessing Central Density')
         endif
         call wd_guess_rho_0(sim_accMass+sim_torusMass,sim_rhoGuess)
     endif
 
-    if (gr_meshMe .eq. MASTER_PE) then
+    if (myPE .eq. MASTER_PE) then
         input = sim_rhoGuess
         call run_newt(newt_wd_mass_1d, 1, sim_massAcc, input, output)
 
@@ -128,7 +129,7 @@ subroutine Simulation_init()
         !    if(rho1.gt.1.1e0*rho0) rho1 = (1.d0+1.d-1*(1.d3 - n)/1.d3)*rho0
         !    if(rho1.lt.0.9e0*rho0) rho1 = (1.d0-1.d-1*(1.d3 - n)/1.d3)*rho0
         !    write (int_to_str, '(i11)') n
-        !    call Logfile_stampMessage('[Simulation Init] Generating Accretor in 3D, Iteration #' // &
+        !    call Logfile_stampMessage(myPE,'[Simulation Init] Generating Accretor in 3D, Iteration #' // &
         !        trim(adjustl(int_to_str)))
 
         !    call wd_intout(rho1,sim_accTemp,wd_mass_tot,ipos,radius,rhop,m,eint,temper,omega,theta)
@@ -194,17 +195,17 @@ subroutine Simulation_init()
         !    deallocate(grid_3d)
 
         !    write (int_to_str, '(e10.4)') radius(ipos(1))
-        !    call Logfile_stampMessage('Radius: (equator): ' // trim(adjustl(int_to_str)))
+        !    call Logfile_stampMessage(myPE,'Radius: (equator): ' // trim(adjustl(int_to_str)))
         !    write (int_to_str, '(e10.4)') radius(ipos(ns))
-        !    call Logfile_stampMessage('Radius: (pole): ' // trim(adjustl(int_to_str)))
+        !    call Logfile_stampMessage(myPE,'Radius: (pole): ' // trim(adjustl(int_to_str)))
         !    write (int_to_str, '(e10.4)') wd_mass_tot
-        !    call Logfile_stampMessage('Mass: ' // trim(adjustl(int_to_str)))
+        !    call Logfile_stampMessage(myPE,'Mass: ' // trim(adjustl(int_to_str)))
         !    write (int_to_str, '(i10)') ipos(1)
-        !    call Logfile_stampMessage('Profile length (equator): ' // trim(adjustl(int_to_str)))
+        !    call Logfile_stampMessage(myPE,'Profile length (equator): ' // trim(adjustl(int_to_str)))
         !    write (int_to_str, '(e10.4)') abs(wd_mass_tot-sim_accMass-sim_torusMass)/(sim_accMass+sim_torusMass)
-        !    call Logfile_stampMessage('Mass Error: ' // trim(adjustl(int_to_str)))
+        !    call Logfile_stampMessage(myPE,'Mass Error: ' // trim(adjustl(int_to_str)))
         !    write (int_to_str, '(e10.4)') rhop(1,1)
-        !    call Logfile_stampMessage('Central Density: ' // trim(adjustl(int_to_str)))
+        !    call Logfile_stampMessage(myPE,'Central Density: ' // trim(adjustl(int_to_str)))
 
         !    if (n .gt. 1000) then
         !        print *, 'wd mass did not converge!'

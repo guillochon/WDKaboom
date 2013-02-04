@@ -99,7 +99,7 @@ subroutine gr_markRefineDerefine(myPE,&
 
 !==============================================================================
 
-  max_refine = int(refine_filter) !Hack to set maximum refinement level for a given criteria
+  max_refine = nint(refine_filter) !Hack to set maximum refinement level for a given criteria
 
   if (no_permanent_guardcells) gcell_on_cc_backup = gcell_on_cc
 

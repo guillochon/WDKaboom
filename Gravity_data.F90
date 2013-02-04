@@ -22,13 +22,13 @@ module Gravity_data
   integer, save :: grav_boundary  !integer boundary condition
 
   integer, save :: grav_geometry  !mesh geometry
-  integer, save :: grv_meshMe, grv_meshNumProcs, grv_meshComm
-  integer, save :: grv_commSize=1
+  integer, save :: grv_myPE, grv_numProcs
+
+  integer, save :: grv_dynRefineMax
 
   logical, save :: useGravity, updateGravity
   logical, save :: grav_temporal_extrp !extrapolate or otherwise rescale
 
   real,    save :: grav_poisfact
-  integer, save :: grv_dynRefineMax
 
 end module Gravity_data

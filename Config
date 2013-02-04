@@ -9,7 +9,7 @@ PPDEFINE HIDE_SANITIZE
 
 REQUIRES Driver
 REQUIRES physics/Hydro
-REQUIRES physics/Eos/EosMain/Helmholtz/SpeciesBased
+REQUIRES physics/Eos/EosMain/Helmholtz/SpeciesBased2
 REQUIRES Simulation/SimulationComposition
 REQUIRES Multispecies
 REQUIRES physics/sourceTerms/Burn/BurnMain/nuclearBurn/
@@ -37,7 +37,7 @@ ENDIF
 #REQUIRES Grid/GridSolvers/Multipole
 
 PPDEFINE MULTIPOLE
-REQUIRES physics/Gravity/GravityMain/Poisson/Multipole_experimental
+REQUIRES physics/Gravity/GravityMain/Poisson/Multipole
 
 #PPDEFINE MULTIGRID
 #REQUIRES physics/Gravity/GravityMain/Poisson/Multigrid
@@ -89,7 +89,6 @@ PARAMETER sim_critDens     REAL 0.0E0
 PARAMETER sim_critKine     REAL 0.0E0
 PARAMETER sim_dbleDetTemp  REAL 0.0E0
 PARAMETER sim_explodeCore  BOOLEAN false
-PARAMETER sim_detHeight    INTEGER 1
 
 PARAMETER larget           REAL 1.0E10
 

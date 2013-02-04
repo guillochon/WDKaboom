@@ -6,11 +6,11 @@
 
 Module Gravity_interface
 
-  interface
-     subroutine Gravity_sendOutputData()
-       implicit none
+  interface                               
+     subroutine Gravity_sendOutputData()  
+       implicit none                      
      end subroutine Gravity_sendOutputData
-  end interface
+  end interface                           
 
   interface
      subroutine Gravity_accelAtCoords (numPoints, iCoords,jCoords,kCoords, accelDir,&
@@ -45,9 +45,9 @@ Module Gravity_interface
   end interface
 
   interface Gravity_computeDt
-     subroutine Gravity_computeDt (blockID, dt_grav, dt_minloc)
+     subroutine Gravity_computeDt (blockID, myPE, dt_grav, dt_minloc)
        real,intent(OUT)       ::  dt_grav
-       integer, intent(IN)    ::  blockID
+       integer, intent(IN)    ::  blockID, myPE
        integer, intent(INOUT) :: dt_minloc(5)
      end subroutine Gravity_computeDt
   end interface
@@ -58,8 +58,8 @@ Module Gravity_interface
   end interface
 
   interface Gravity_init
-     subroutine Gravity_init()
-       
+     subroutine Gravity_init(myPE)
+       integer, intent(IN) :: myPE
      end subroutine Gravity_init
   end interface
 
@@ -71,9 +71,9 @@ Module Gravity_interface
   end interface
 
   interface Gravity_unitTest
-     subroutine Gravity_unitTest( fileUnit, perfect)
+     subroutine Gravity_unitTest(myPE, fileUnit, perfect)
        implicit none
-       integer, intent(in) :: fileUnit
+       integer, intent(in) :: myPE, fileUnit
        logical, intent(out) :: perfect
      end subroutine Gravity_unitTest
   end interface

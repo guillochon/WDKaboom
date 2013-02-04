@@ -13,7 +13,7 @@
 !!                integer(in) :: guard,
 !!                integer(in) :: bcs,
 !!                integer(in) :: xyzswp, 
-!!                integer(in) :: hy_meshMe, 
+!!                integer(in) :: myPE, 
 !!                real(in)    :: dt, 
 !!                real(in)    :: dt_old,                 
 !!                integer(in) :: jCell, 
@@ -80,7 +80,7 @@
 !!   guard -  number of guard cells
 !!   bcs -
 !!   xyzswp - the direction of the sweep
-!!   hy_meshMe - the local processor number. 
+!!   myPE - the local processor number. 
 !!   dt -   current delta t
 !!   dt_old - delta t from previous step
 !!   jCell -   index that indicates where we are in terms of the
@@ -151,7 +151,7 @@
 !!***
 
 subroutine hydro_1d (blockID,numIntCells,numCells, guard,bcs,        &
-                     xyzswp, hy_meshMe, dt, dt_old,                 &
+                     xyzswp, myPE, dt, dt_old,                 &
                      jCell, kCell,                             &
                      igeom, useGravity,                             &
                      xbot, xtop,                               &
@@ -176,7 +176,6 @@ subroutine hydro_1d (blockID,numIntCells,numCells, guard,bcs,        &
        hy_epsiln, hy_omg1, hy_omg2
   use Hydro_data, ONLY : hy_cvisc, hy_useCmaAdvection, hy_smallx, hy_smallp
   use Hydro_data, ONLY : hy_numXn, hy_hybridRiemann, hy_updateHydroFluxes
-  use Hydro_data, ONLY : hy_ppmEnerFluxConstructionMeth
   use Driver_interface, ONLY : Driver_abortFlash
   use Gravity_interface, ONLY : Gravity_accelOneRow
   use hy_ppm_interface, ONLY: hy_ppm_force, hy_ppm_geom, hy_ppm_completeGeomFactors
@@ -187,7 +186,7 @@ subroutine hydro_1d (blockID,numIntCells,numCells, guard,bcs,        &
 
 !--arguments-------------------------
   integer, intent(IN) ::  blockID,jCell, kCell, numIntCells,numCells,&
-                          xyzswp, hy_meshMe,igeom, guard
+                          xyzswp, myPE,igeom, guard
   real, intent(IN) :: dt, dt_old
 
   logical, intent(IN) :: useGravity
@@ -228,13 +227,12 @@ subroutine hydro_1d (blockID,numIntCells,numCells, guard,bcs,        &
               &                   rhol, rhor, ul, ur, utl, utr, uttl, uttr, &
               &                   pl, pr, vl, vr, gamcl, gamcr, c, ce, &
               &                   urell, ugrdl, gameav, gamel, gamer, &
-              &                   eintl, eintr, eintAv, &
               &                   v, dvol, &
               &                   ograv, hgrav
 
 
   
-  real, DIMENSION(numCells) ::  scrch1, scrchEkin
+  real, DIMENSION(numCells) ::  scrch1
   real, DIMENSION(numCells) ::  avis
   real, DIMENSION(numCells) ::  xzn, yzn, zzn
   real, DIMENSION(numCells) :: xlold, xrold, dxold, dvold, &
@@ -311,9 +309,8 @@ subroutine hydro_1d (blockID,numIntCells,numCells, guard,bcs,        &
 
        do i = 1,numIntCells8
           dg       = dtfac*(grav(i) - ograv(i))
-          !Modified by JFG to exclude extrapolation
-          hgrav(i) = grav(i)! + 0.5e0*dg
-          ngrav(i) = grav(i)! +       dg
+          hgrav(i) = grav(i) + 0.5e0*dg
+          ngrav(i) = grav(i) +       dg
        enddo
 
 #else
@@ -369,17 +366,6 @@ subroutine hydro_1d (blockID,numIntCells,numCells, guard,bcs,        &
        enddo
     endif
 
-    ! compute the internal energy - first time
-    do i = 1,numIntCells8 
-       eint(i) = e(i) - 0.5e0*(u(i)**2 + ut(i)**2 + utt(i)**2)
-       select case (hy_ppmEnerFluxConstructionMeth)
-       case(0,1,3,4)
-          eint(i) = max(eint(i),hy_smallp/rho(i)) !primitive (mass-specific)
-       case(2,5)
-          eint(i) = max(eint(i),hy_smallp/rho(i)) * rho(i) !conserved (per-vol)
-       end select
-    enddo
-
 ! Obtain PPM interpolation coefficients.
     call intrfc(xyzswp,numIntCells,numCells, guard,&
          &      rho,u,ut,utt,p, &
@@ -387,7 +373,7 @@ subroutine hydro_1d (blockID,numIntCells,numCells, guard,bcs,        &
          &      utl,utr,uttl,uttr, &
          &      pl,pr,vl,vr,gamcl, &
          &      gamcr,game, &
-         &      gamel,gamer,gamc,hgrav,eint,eintl,eintr,xn, &
+         &      gamel,gamer,gamc,hgrav,xn, &
          &      xnl,xnr,v,primaryDx, primaryCoord,tmp)
 
     ! Determine input states for the Riemann solver.
@@ -397,14 +383,13 @@ subroutine hydro_1d (blockID,numIntCells,numCells, guard,bcs,        &
                  utl,utr,uttl,uttr,p, pl,pr, &
                  gamcl,gamcr,&
                  ugrid,ce,game,gamer,gamc,gamel,&
-                 eintl,eintr, &
                  xnl,xnr, &
                  dtdx, dt, &
                  primaryCoord, primaryLeftCoord, radialCoord, hgrav, fict)
     ! Solve Riemann problems at zone edges.
     call rieman(numIntCells,numCells, &
                 rhoav,uav,utav,uttav,pav,&
-                urell,ugrdl,game,gameav,eintAv,xnav,primaryCoord)
+                urell,ugrdl,game,gameav,xnav,primaryCoord)
 
 
     select case (xyzswp)
@@ -513,68 +498,28 @@ subroutine hydro_1d (blockID,numIntCells,numCells, guard,bcs,        &
 
     !------------------------------------------------------------------------------
     ! Compute unmodified fluxes for each of the conserved quantities.
-    !
-    !For different ppmEnerFluxConstructionMeth methods, energy fluxes are
-    !constructed here from the following rieman outputs:
-    !
-    !        |                  Rieman results (assuming that urell==uav)
-    ! Method |    used for eintflx         |    used for eflx
-    !==============================================================================
-    !   0    | rhoav,uav,       pav,gameav | rhoav,uav,       pav,gameav,utav,uttav
-    !   1,2* | rhoav,uav,eintAv,pav        | rhoav,uav,eintAv,pav       ,utav,uttav
-    !   3    | rhoav,uav,       pav,gameav | rhoav,uav,       pav,gameav,utav,uttav
-    !   4,5* | rhoav,uav,eintAv,    gameav | rhoav,uav,eintAv,    gameav,utav,uttav
-    !Possible optimization:
-    !   0    |       uav,       pav,gameav | rhoav,uav,       pav,gameav,utav,uttav
-    !   1,2* | rhoav,uav,eintAv,pav        | rhoav,uav,eintAv,pav       ,utav,uttav
-    !   3    |       uav,       pav,gameav | rhoav,uav,       pav,gameav,utav,uttav
-    !   4,5* | rhoav,uav,eintAv,    gameav | rhoav,uav,eintAv,    gameav,utav,uttav
-    !==============================================================================
-    ! * For methods 2 and 5, PPM reconstruction, interpolation, and advection for
-    !   eintAv is applied to a conserved internal energy variable (i.e., internal
-    !   energy expressed in per-volume form). Otherwise, the primitive (specific)
-    !   internal energy is used.
-
 
     do i = 5, numIntCells5
        rhoflx(i) = rhoav (i) * urell(i)
        uflx(i)   = rhoflx(i) * uav  (i)
        utflx(i)  = rhoflx(i) * utav (i)
        uttflx(i) = rhoflx(i) * uttav(i)
-
-       select case (hy_ppmEnerFluxConstructionMeth)
-       case(0,3)
-          scrch1(i) = pav(i) / ( rhoav(i) * (gameav(i)-1.e0) )
-       case(1,4)
-          scrch1(i) = eintAv(i)
-       case(2,5)
-          scrch1(i) = eintAv(i) / rhoav(i)
-       end select
+       scrch1(i) = pav(i) / ( rhoav(i) * (gameav(i)-1.e0) )
 
        ! compute the internal energy flux
-       
-       select case (hy_ppmEnerFluxConstructionMeth)
-       case(0,1,2)
-          eintflx(i) = rhoflx(i) * scrch1(i) + uav(i) * pav(i)
-       case(3,4,5)
-          eintflx(i) = rhoflx(i) * scrch1(i) * gameav(i) 
-       end select
+       eintflx(i) = rhoflx(i) * scrch1(i) + uav(i) * pav(i)
 
        ! add the kinetic energy 
-!!$       scrch1(i) = scrch1(i) &
-!!$            &        + 0.5e0 * (uav(i)**2 + utav(i)**2 + uttav(i)**2)
-       scrchEkin(i) = 0.5e0 * (uav(i)**2 + utav(i)**2 + uttav(i)**2)
+       scrch1(i) = scrch1(i) &
+            &        + 0.5e0 * (uav(i)**2 + utav(i)**2 + uttav(i)**2)
 
        ! compute the total energy flux
-!!$       eflx(i)   = rhoflx(i) * scrch1(i) + uav(i) * pav(i)
-       eflx(i)   = eintflx(i) + rhoflx(i) * scrchEkin(i)
+       eflx(i)   = rhoflx(i) * scrch1(i) + uav(i) * pav(i)
 
        ! initialize the artificial viscosity coefficient
     enddo
-999 format(A7,I3,':',9(1P,G16.9,1x))
-!!$    print 999,'eintflx',blockID,eintflx(5:numIntCells5)
     avis = 0.0
-    ! recompute the internal energy, over the whole structure
+    ! compute the internal energy over the whole structure
     do i = 1,numIntCells8 
        eint(i) = e(i) - 0.5e0*(u(i)**2 + ut(i)**2 + utt(i)**2)
        eint(i) = max(eint(i),hy_smallp/rho(i))

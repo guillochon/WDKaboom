@@ -1,4 +1,4 @@
-!!****if* source/physics/Gravity/GravityMain/Poisson/Multipole_experimental/Gravity_init
+!!****if* source/physics/Gravity/GravityMain/Poisson/Multipole/Gravity_init
 !!
 !! NAME
 !!
@@ -7,7 +7,7 @@
 !! 
 !! SYNOPSIS
 !!
-!!  Gravity_init()
+!!  Gravity_init(integer(IN) :: myPE)
 !!
 !!
 !! DESCRIPTION
@@ -18,33 +18,33 @@
 !!
 !!  ARGUMENTS
 !!
-!!  
+!!  myPE - local processor number
 !!
 !!***
 
-subroutine Gravity_init()
+subroutine Gravity_init(myPE)
 
   use Gravity_data
-  use Driver_data, ONLY : dr_restart
-  use tree, ONLY : lrefine_max
-  use Driver_interface, ONLY : Driver_abortFlash, Driver_getMype,&
-       Driver_getNumProcs, Driver_getComm
+  use Driver_interface, ONLY : Driver_abortFlash
+  use Grid_interface, ONLY: Grid_getNumProcs
   use RuntimeParameters_interface, ONLY : RuntimeParameters_get, &
     RuntimeParameters_mapStrToInt
   use PhysicalConstants_interface, ONLY : PhysicalConstants_get
+  use Driver_data, ONLY : dr_restart
+  use tree, ONLY : lrefine_max
+  use IO_interface, ONLY : IO_getScalar
 
   implicit none
   real,save :: newton
 
 #include "constants.h"
 
-  
+  integer, intent(IN) :: myPE
   character(len=MAX_STRING_LENGTH) :: strGeometry
 
   ! Everybody should know these
-  call Driver_getMype(MESH_COMM,grv_meshMe)
-  call Driver_getNumProcs(MESH_COMM,grv_meshNumProcs)
-  call Driver_getComm(MESH_COMM,grv_meshComm)
+  grv_myPE = myPE
+  call Grid_getNumProcs(grv_numProcs)
 
 
   call RuntimeParameters_get("geometry", strGeometry)
@@ -69,13 +69,14 @@ subroutine Gravity_init()
   call RuntimeParameters_get("updateGravity", updateGravity)
   call PhysicalConstants_get("Newton", newton)
 
-  grav_poisfact = 4. * PI * Newton
-
   if (dr_restart) then
       call IO_getScalar("dynrefinemax", grv_dynRefineMax) 
   else
       grv_dynRefineMax = lrefine_max
   endif
+
+  grav_poisfact = 4. * PI * Newton
+
 
   return
 end subroutine Gravity_init
