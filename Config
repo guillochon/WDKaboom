@@ -8,6 +8,7 @@ PPDEFINE HIDE_SANITIZE
 #PPDEFINE DEBUG_EOS
 
 REQUIRES Driver
+REQUIRES Grid
 REQUIRES physics/Hydro
 REQUIRES physics/Eos/EosMain/Helmholtz/SpeciesBased
 REQUIRES Simulation/SimulationComposition
@@ -37,7 +38,8 @@ ENDIF
 #REQUIRES Grid/GridSolvers/Multipole
 
 PPDEFINE MULTIPOLE
-REQUIRES physics/Gravity/GravityMain/Poisson/Multipole_experimental
+REQUIRES physics/Gravity/GravityMain/Poisson
+#REQUIRES physics/Gravity/GravityMain/Poisson/Multipole
 
 #PPDEFINE MULTIGRID
 #REQUIRES physics/Gravity/GravityMain/Poisson/Multigrid

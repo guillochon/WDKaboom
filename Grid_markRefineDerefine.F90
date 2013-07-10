@@ -43,7 +43,6 @@ subroutine Grid_markRefineDerefine(MyPE)
   use Grid_interface, ONLY : Grid_fillGuardCells
   use Driver_interface, ONLY: Driver_getSimTime
   use Grid_interface, ONLY : Grid_getMinCellSize
-  use Gravity_data, ONLY : grv_dynRefineMax
   use Simulation_data
 
   implicit none
@@ -89,13 +88,13 @@ subroutine Grid_markRefineDerefine(MyPE)
   else
       call MPI_ALLREDUCE (lnblocks,max_blocks,1,MPI_INTEGER,MPI_SUM,MPI_COMM_WORLD,ierr)
       if (max_blocks .gt. sim_maxBlocks) then
-          grv_dynRefineMax = grv_dynRefineMax - 1
+          sim_dynRefineMax = sim_dynRefineMax - 1
       endif
       do l = 1,gr_numRefineVars
          iref = gr_refine_var(l)
          ref_cut = gr_refine_cutoff(l)
          deref_cut = gr_derefine_cutoff(l)
-         ref_filter = min(int(gr_refine_filter(l)), grv_dynRefineMax)
+         ref_filter = min(int(gr_refine_filter(l)), sim_dynRefineMax)
          call gr_markRefineDerefine(MyPE,iref,ref_cut,deref_cut,ref_filter)
       end do
 

@@ -58,4 +58,6 @@ module Simulation_data
   integer, save             :: ipos(ns), core_pos, sim_maxBlocks, sim_detHeight
   logical, save             :: exploded, sim_explodeCore
 
+  integer, save             :: sim_dynRefineMax
+
 end module Simulation_data
