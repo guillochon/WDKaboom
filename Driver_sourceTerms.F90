@@ -42,7 +42,7 @@ subroutine Driver_sourceTerms(blockCount, blockList, dt)
     use Grid_interface, ONLY : Grid_getBlkIndexLimits, Grid_getBlkPtr, Grid_releaseBlkPtr,&
         Grid_getCellCoords, Grid_putPointData, Grid_getMinCellSize
     use Eos_interface, ONLY : Eos_wrapped, Eos
-    use gr_mpoleData, ONLY: X_centerofmass, Y_centerofmass, Z_centerofmass, Mtot
+    use gr_mpoleData, ONLY: gr_mpoleXcenterOfMass, gr_mpoleYcenterOfMass, gr_mpoleZcenterOfMass, gr_mpoleTotalMass
     use PhysicalConstants_interface, ONLY : PhysicalConstants_get
     use RuntimeParameters_interface, ONLY : RuntimeParameters_mapStrToInt, RuntimeParameters_get
     use Logfile_interface, ONLY : Logfile_stampMessage
@@ -101,9 +101,9 @@ subroutine Driver_sourceTerms(blockCount, blockList, dt)
             do k = blkLimits(LOW, KAXIS), blkLimits(HIGH, KAXIS)
                 do j = blkLimits(LOW, JAXIS), blkLimits(HIGH, JAXIS)
                     do i = blkLimits(LOW, IAXIS), blkLimits(HIGH, IAXIS)
-                        x = xCoord(i) - X_centerofmass
-                        y = yCoord(j) - Y_centerofmass
-                        z = zCoord(k) - Z_centerofmass
+                        x = xCoord(i) - gr_mpoleXcenterOfMass
+                        y = yCoord(j) - gr_mpoleYcenterOfMass
+                        z = zCoord(k) - gr_mpoleZcenterOfMass
                         vx = solnData(VELX_VAR,i,j,k)
                         vy = solnData(VELY_VAR,i,j,k)
                         vz = solnData(VELZ_VAR,i,j,k)
@@ -177,7 +177,7 @@ subroutine Driver_sourceTerms(blockCount, blockList, dt)
                             endif
                             if ((solnData(HE4_SPEC,i,j,k) .ge. 0.5d0) .and. &
                                 (minval(solnData(HE4_SPEC,i,j+sim_detHeight:j+sim_detHeight+1,k)) .lt. 0.5d0) .and. &
-                                (sqrt((xCoord(i) - X_centerofmass)**2.d0 + (zCoord(k) - Z_centerofmass)**2.d0) .le. sim_detRadius*mcs)) then
+                                (sqrt((xCoord(i) - gr_mpoleXcenterOfMass)**2.d0 + (zCoord(k) - gr_mpoleZcenterOfMass)**2.d0) .le. sim_detRadius*mcs)) then
                                 solnData(DENS_VAR,i,j,k) = sim_detDens
                                 solnData(TEMP_VAR,i,j,k) = sim_detTemp
                             endif
@@ -211,7 +211,7 @@ subroutine Driver_sourceTerms(blockCount, blockList, dt)
                 do k = blkLimits(LOW, KAXIS), blkLimits(HIGH, KAXIS)
                     do j = blkLimits(LOW, JAXIS), blkLimits(HIGH, JAXIS)
                         do i = blkLimits(LOW, IAXIS), blkLimits(HIGH, IAXIS)
-                            if (solnData(HE4_SPEC,i,j,k) .lt. 0.1d0 .and. dabs(zCoord(k) - Z_centerofmass) .le. mcs .and. &
+                            if (solnData(HE4_SPEC,i,j,k) .lt. 0.1d0 .and. dabs(zCoord(k) - gr_mpoleZcenterOfMass) .le. mcs .and. &
                                 solnData(DENS_VAR,i,j,k) .gt. sim_critDens .and. &
                                 0.5d0*solnData(DENS_VAR,i,j,k)*sum(solnData(VELX_VAR:VELZ_VAR,i,j,k)**2.d0) .gt. max_expl_kine) then
                                 max_expl_kine = 0.5d0*solnData(DENS_VAR,i,j,k)*sum(solnData(VELX_VAR:VELZ_VAR,i,j,k)**2.d0)
@@ -255,7 +255,7 @@ subroutine Driver_sourceTerms(blockCount, blockList, dt)
                         do j = blkLimits(LOW, JAXIS), blkLimits(HIGH, JAXIS)
                             do i = blkLimits(LOW, IAXIS), blkLimits(HIGH, IAXIS)
                                 if (sqrt((xCoord(i) - expl_coord(1))**2.d0 + (yCoord(j) - expl_coord(2))**2.d0 + &
-                                         (zCoord(k) - Z_centerofmass)**2.d0) .le. sim_detRadius*mcs) then
+                                         (zCoord(k) - gr_mpoleZcenterOfMass)**2.d0) .le. sim_detRadius*mcs) then
                                     solnData(TEMP_VAR,i,j,k) = sim_dbleDetTemp
                                     solnData(VELX_VAR:VELZ_VAR,i,j,k) = 0.d0
                                 endif

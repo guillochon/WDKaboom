@@ -38,8 +38,7 @@ ENDIF
 #REQUIRES Grid/GridSolvers/Multipole
 
 PPDEFINE MULTIPOLE
-REQUIRES physics/Gravity/GravityMain/Poisson
-#REQUIRES physics/Gravity/GravityMain/Poisson/Multipole
+REQUIRES physics/Gravity/GravityMain/Poisson/Multipole
 
 #PPDEFINE MULTIGRID
 #REQUIRES physics/Gravity/GravityMain/Poisson/Multigrid
