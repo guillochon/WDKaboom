@@ -46,7 +46,7 @@ subroutine Driver_sourceTerms(blockCount, blockList, dt)
     use PhysicalConstants_interface, ONLY : PhysicalConstants_get
     use RuntimeParameters_interface, ONLY : RuntimeParameters_mapStrToInt, RuntimeParameters_get
     use Logfile_interface, ONLY : Logfile_stampMessage
-    use Grid_data, ONLY : gr_meshMe
+    use Grid_data, ONLY : gr_meshMe, gr_globalComm
     implicit none
 #include "Eos.h"
 #include "constants.h"
@@ -227,10 +227,10 @@ subroutine Driver_sourceTerms(blockCount, blockList, dt)
                 deallocate(zCoord)
             enddo
             mpi_input = (/ max_expl_kine, dble(gr_meshMe) /)
-            call MPI_ALLREDUCE (mpi_input, mpi_output, 1, MPI_2DOUBLE_PRECISION, MPI_MAXLOC, MPI_COMM_WORLD, ierr)
+            call MPI_ALLREDUCE (mpi_input, mpi_output, 1, MPI_2DOUBLE_PRECISION, MPI_MAXLOC, gr_globalComm, ierr)
             if (mpi_output(1) .gt. sim_critKine) then
                 sim_explodeCore = .false.
-                call MPI_BCAST(expl_coord, 2, FLASH_REAL, int(mpi_output(2)), MPI_COMM_WORLD, ierr)
+                call MPI_BCAST(expl_coord, 2, FLASH_REAL, int(mpi_output(2)), gr_globalComm, ierr)
                 if (gr_meshMe .eq. int(mpi_output(2))) then
                     call Logfile_stampMessage('Core exploded!')
                     write(str, *) 'Explosion coordinates: ', expl_coord

@@ -5,7 +5,7 @@
 !!
 !! SYNOPSIS
 !!
-!!  Grid_markRefineDerefine(integer(IN) :: myPE)
+!!  Grid_markRefineDerefine()
 !!  
 !! DESCRIPTION 
 !!  Mark blocks for refinement or derefinement
@@ -15,24 +15,23 @@
 !!  this routine, and uses the stub.
 !!
 !! ARGUMENTS
-!!  myPE : my processor id.
 !! 
 !! NOTES
 !!
 !! Every unit uses a few unit scope variables that are
 !! accessible to all routines within the unit, but not to the
 !! routines outside the unit. For Grid unit these variables begin with "gr_"
-!! like, gr_myPE or gr_eosMode, and are stored in fortran
+!! like, gr_meshMe or gr_eosMode, and are stored in fortran
 !! module Grid_data (in file Grid_data.F90). The other variables
 !! are local to the specific routines and do not have the prefix "gr_"
 !!
 !!
 !!***
 
-subroutine Grid_markRefineDerefine(MyPE)
+subroutine Grid_markRefineDerefine()
 
   use Grid_data, ONLY : gr_refine_cutoff, gr_derefine_cutoff,&
-                        gr_refine_filter,&
+                        gr_refine_filter, gr_globalComm, &
                         gr_numRefineVars,gr_refine_var,gr_refineOnParticleCount,&
                         gr_enforceMaxRefinement, gr_maxRefine,&
                         gr_lrefineMaxRedDoByTime,&
@@ -51,8 +50,6 @@ subroutine Grid_markRefineDerefine(MyPE)
 #include "Flash_mpi.h"
 #include "Flash.h"
 
-  integer,intent(IN) :: MyPE
-  
   real :: ref_cut,deref_cut,ref_filter,t,blockwidth
   integer       :: l,i,iref,jLo,ierr,max_blocks
   logical :: doEos=.true.
@@ -71,7 +68,7 @@ subroutine Grid_markRefineDerefine(MyPE)
      if (iref > 0) gcMask(iref) = .TRUE.
   end do
 
-  call Grid_fillGuardCells(MyPE,CENTER_FACES,ALLDIR,doEos=.true.,&
+  call Grid_fillGuardCells(CENTER_FACES,ALLDIR,doEos=.true.,&
        maskSize=maskSize, mask=gcMask, makeMaskConsistent=.true.,&
        selectBlockType=ACTIVE_BLKS)
 
@@ -86,7 +83,7 @@ subroutine Grid_markRefineDerefine(MyPE)
   if (t .eq. sim_tInitial) then
       call gr_markInRadius(sim_xCenter, sim_yCenter, sim_zCenter, wd_radius, lrefine_max, 0)                                
   else
-      call MPI_ALLREDUCE (lnblocks,max_blocks,1,MPI_INTEGER,MPI_SUM,MPI_COMM_WORLD,ierr)
+      call MPI_ALLREDUCE(lnblocks,max_blocks,1,MPI_INTEGER,MPI_SUM,gr_globalComm,ierr)
       if (max_blocks .gt. sim_maxBlocks) then
           sim_dynRefineMax = sim_dynRefineMax - 1
       endif
@@ -95,7 +92,7 @@ subroutine Grid_markRefineDerefine(MyPE)
          ref_cut = gr_refine_cutoff(l)
          deref_cut = gr_derefine_cutoff(l)
          ref_filter = min(int(gr_refine_filter(l)), sim_dynRefineMax)
-         call gr_markRefineDerefine(MyPE,iref,ref_cut,deref_cut,ref_filter)
+         call gr_markRefineDerefine(iref,ref_cut,deref_cut,ref_filter)
       end do
 
 !      call gr_markVarThreshold(DENS_VAR, sim_rhoCutoff, 1, lrefine_max, .false.)
@@ -103,7 +100,7 @@ subroutine Grid_markRefineDerefine(MyPE)
 #ifdef FLASH_GRID_PARAMESH2
       ! Make sure lrefine_min and lrefine_max are obeyed - KW
       if (gr_numRefineVars .LE. 0) then
-         call gr_markRefineDerefine(MyPE,-1, 0.0, 0.0, 0.0)
+         call gr_markRefineDerefine(-1, 0.0, 0.0, 0.0)
       end if
 #endif
 

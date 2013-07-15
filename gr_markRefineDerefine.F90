@@ -5,7 +5,7 @@
 !!
 !! SYNOPSIS
 !!
-!!  gr_markRefineDerefine(integer(IN) :: myPE,
+!!  gr_markRefineDerefine(integer(IN) :: gr_meshMe,
 !!                        integer(IN) :: iref,
 !!                        real(IN) :: refine_cutoff,
 !!                        real(IN) :: derefine_cutoff,
@@ -21,7 +21,7 @@
 !!
 !!  ARGUMENTS 
 !!
-!!    myPE - local processor nnumber
+!!    gr_meshMe - local processor nnumber
 !!
 !!    iref - index of the refinement variable in data structure "unk"
 !!
@@ -45,13 +45,14 @@
 !!REORDER(5): unk, unk1
 
 
-subroutine gr_markRefineDerefine(myPE,&
+subroutine gr_markRefineDerefine(&
                               iref,refine_cutoff,derefine_cutoff,refine_filter)
 
   use paramesh_dimensions
   use physicaldata, ONLY : gcell_on_cc, unk, unk1, no_permanent_guardcells
   use tree
-  use Grid_data, ONLY: gr_geometry, gr_oneBlock, gr_maxRefine, gr_lrefineMaxRedDoByTime
+  use Grid_data, ONLY: gr_geometry, gr_oneBlock, gr_maxRefine, gr_lrefineMaxRedDoByTime,&
+       gr_meshComm, gr_meshMe
 
   use paramesh_interfaces, ONLY: amr_1blk_guardcell
 
@@ -61,7 +62,7 @@ subroutine gr_markRefineDerefine(myPE,&
 #include "Flash.h"
 #include "constants.h"  
 
-  integer, intent(IN) :: myPE,iref
+  integer, intent(IN) :: iref
   real, intent(IN) :: refine_cutoff, derefine_cutoff, refine_filter
   integer, parameter :: SQNDIM = NDIM*NDIM
   
@@ -118,7 +119,7 @@ subroutine gr_markRefineDerefine(myPE,&
 ! If this routine must be used in a situation where the conditions above
 ! are not true, the simplest (but probably inefficient) way of adapting
 ! this code to that situation would be uncommenting the following line:
-!!$  call Grid_fillGuardCells(myPE,CENTER_FACES,ALLDIR)
+!!$  call Grid_fillGuardCells(gr_meshMe,CENTER_FACES,ALLDIR)
 
 ! The following is unused code - it copies only the inner cells to work.
 !!$  do lb = 1,lnblocks
@@ -163,13 +164,13 @@ subroutine gr_markRefineDerefine(myPE,&
   nrecv = 0
   do lb = 1,lnblocks
      if(parent(1,lb).gt.-1) then
-        if (parent(2,lb).ne.myPE) then
+        if (parent(2,lb).ne.gr_meshMe) then
            nrecv = nrecv + 1
            call MPI_IRecv(error_par(lb),1, &
                 MPI_DOUBLE_PRECISION, &
                 parent(2,lb), &
                 lb, &
-                MPI_COMM_WORLD, &
+                gr_meshComm, &
                 reqr(nrecv), &
                 ierr)
         else
@@ -184,14 +185,14 @@ subroutine gr_markRefineDerefine(myPE,&
   do lb = 1,lnblocks
      do j = 1,nchild
         if(child(1,j,lb).gt.-1) then
-           if (child(2,j,lb).ne.myPE) then
+           if (child(2,j,lb).ne.gr_meshMe) then
               nsend = nsend + 1
               call MPI_ISend(error(lb), &
                    1, &
                    MPI_DOUBLE_PRECISION, &
                    child(2,j,lb), &  ! PE TO SEND TO
                    child(1,j,lb), &  ! THIS IS THE TAG
-                   MPI_COMM_WORLD, &
+                   gr_meshComm, &
                    reqs(nsend), &
                    ierr)
            end if

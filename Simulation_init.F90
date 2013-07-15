@@ -31,12 +31,14 @@ subroutine Simulation_init()
 
     use Simulation_data 
     use Driver_data, ONLY : dr_restart, dr_simTime
+    use tree, ONLY : lrefine_max
     use RuntimeParameters_interface, ONLY : RuntimeParameters_get
     use Logfile_interface
     use Grid_interface, ONLY : Grid_getMinCellSize
     use newt_wrappers
     use sim_newt_functions
-    use Grid_data, ONLY : gr_meshMe
+    use Grid_data, ONLY : gr_meshMe, gr_globalComm
+    use IO_interface, ONLY : IO_getScalar
 
     implicit none
 
@@ -218,15 +220,15 @@ subroutine Simulation_init()
 
     endif
 
-    call MPI_BCAST(radius, np, FLASH_REAL, MASTER_PE, MPI_COMM_WORLD, ierr)
-    call MPI_BCAST(rhop, np*ns, FLASH_REAL, MASTER_PE, MPI_COMM_WORLD, ierr)
-    call MPI_BCAST(eint, np*ns, FLASH_REAL, MASTER_PE, MPI_COMM_WORLD, ierr)
-    call MPI_BCAST(temper, np*ns, FLASH_REAL, MASTER_PE, MPI_COMM_WORLD, ierr)
-    call MPI_BCAST(omega, np*ns, FLASH_REAL, MASTER_PE, MPI_COMM_WORLD, ierr)
-    call MPI_BCAST(theta, ns, FLASH_REAL, MASTER_PE, MPI_COMM_WORLD, ierr)
-    call MPI_BCAST(m, np, FLASH_REAL, MASTER_PE, MPI_COMM_WORLD, ierr)
-    call MPI_BCAST(ipos, ns, FLASH_INTEGER, MASTER_PE, MPI_COMM_WORLD, ierr)
-    call MPI_BCAST(core_pos, ns, FLASH_INTEGER, MASTER_PE, MPI_COMM_WORLD, ierr)
+    call MPI_BCAST(radius, np, FLASH_REAL, MASTER_PE, gr_globalComm, ierr)
+    call MPI_BCAST(rhop, np*ns, FLASH_REAL, MASTER_PE, gr_globalComm, ierr)
+    call MPI_BCAST(eint, np*ns, FLASH_REAL, MASTER_PE, gr_globalComm, ierr)
+    call MPI_BCAST(temper, np*ns, FLASH_REAL, MASTER_PE, gr_globalComm, ierr)
+    call MPI_BCAST(omega, np*ns, FLASH_REAL, MASTER_PE, gr_globalComm, ierr)
+    call MPI_BCAST(theta, ns, FLASH_REAL, MASTER_PE, gr_globalComm, ierr)
+    call MPI_BCAST(m, np, FLASH_REAL, MASTER_PE, gr_globalComm, ierr)
+    call MPI_BCAST(ipos, ns, FLASH_INTEGER, MASTER_PE, gr_globalComm, ierr)
+    call MPI_BCAST(core_pos, ns, FLASH_INTEGER, MASTER_PE, gr_globalComm, ierr)
 
     if (dr_restart .eq. .true. .and. dr_simTime .gt. sim_tExplode) then
         exploded = .true.
@@ -234,5 +236,11 @@ subroutine Simulation_init()
         exploded = .false.
     endif
     wd_radius = radius(ipos(1))
+
+    if (dr_restart) then
+        call IO_getScalar("dynrefinemax", sim_dynRefineMax) 
+    else
+        sim_dynRefineMax = lrefine_max
+    endif
 
 end subroutine Simulation_init

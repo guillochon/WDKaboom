@@ -5,8 +5,7 @@
 !!    IO_writeIntegralQuantities
 !!
 !!  SYNOPSIS
-!!    call IO_writeIntegralQuantities(integer(in) :: myPE, 
-!!                                    integer(in) :: isFirst,
+!!    call IO_writeIntegralQuantities(integer(in) :: isFirst,
 !!                                    real(in)    :: simTime)
 !!
 !!  DESCRIPTION
@@ -28,7 +27,6 @@
 !!  
 !!  ARGUMENTS
 !!    
-!!   myPE - current processor number
 !!   isFirst - if 1 then write header info plus data, otherwise just write data
 !!   simTime - simulation time
 !!
@@ -37,20 +35,20 @@
 
 !!REORDER(4):solnData
 
-subroutine IO_writeIntegralQuantities (myPE, isFirst, simTime)
+subroutine IO_writeIntegralQuantities (isFirst, simTime)
 
-  use IO_data, ONLY : io_restart, io_statsFileName
+  use IO_data, ONLY : io_restart, io_statsFileName, io_globalComm
   use Grid_interface, ONLY : Grid_getListOfBlocks, &
     Grid_getBlkIndexLimits, Grid_getBlkPtr, Grid_getSingleCellVol, &
     Grid_releaseBlkPtr
 
+  use IO_data, ONLY : io_globalMe
   implicit none
 
 #include "Flash_mpi.h"
 #include "constants.h"
 #include "Flash.h"
   
-  integer, intent(in) :: myPE
   real, intent(in) :: simTime
 
   integer, intent(in) :: isFirst
@@ -188,10 +186,10 @@ subroutine IO_writeIntegralQuantities (myPE, isFirst, simTime)
   ! the processors and writes the total to a file.
   
   call MPI_Reduce (lsum, gsum, nGlobalSum, FLASH_REAL, MPI_SUM, & 
-       &                MASTER_PE, MPI_COMM_WORLD, error)
+       &                MASTER_PE, io_globalComm, error)
   
 
-  if (MyPE == MASTER_PE) then
+  if (io_globalMe == MASTER_PE) then
      
      ! create the file from scratch if it is a not a restart simulation, 
      ! otherwise append to the end of the file
@@ -251,7 +249,7 @@ subroutine IO_writeIntegralQuantities (myPE, isFirst, simTime)
      
   endif
   
-  call MPI_Barrier (MPI_Comm_World, error)
+  call MPI_Barrier (io_globalComm, error)
   
   !=============================================================================
   

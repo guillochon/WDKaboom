@@ -7,8 +7,7 @@
 !! 
 !! SYNOPSIS
 !!
-!!  Simulation_initBlock(integer :: blockId, 
-!!                       integer :: myPE)
+!!  Simulation_initBlock(integer :: blockId)
 !!
 !!
 !! DESCRIPTION
@@ -26,7 +25,6 @@
 !! ARGUMENTS
 !!
 !!  blockId -        The number of the block to initialize
-!!  myPE -          current processor number
 !!
 !! PARAMETERS
 !!
@@ -42,7 +40,7 @@
 !!
 !!***
 
-subroutine Simulation_initBlock (blockId, myPE)
+subroutine Simulation_initBlock (blockId)
 
   use Simulation_data
   use Grid_interface, ONLY : Grid_getBlkIndexLimits, Grid_getBlkPtr, Grid_releaseBlkPtr,&
@@ -58,7 +56,6 @@ subroutine Simulation_initBlock (blockId, myPE)
 #include "Eos.h"
   
   integer,intent(IN) ::  blockId
-  integer,intent(IN) ::  myPE
   
   integer  ::  i, j, k, n, jLo, jHi, tLo, tHi
   integer  ::  ii, jj, kk, put, cnt, nrtemp
