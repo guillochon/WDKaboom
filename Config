@@ -10,7 +10,7 @@ PPDEFINE HIDE_SANITIZE
 REQUIRES Driver
 REQUIRES Grid
 REQUIRES physics/Hydro
-REQUIRES physics/Eos/EosMain/Helmholtz/SpeciesBased
+REQUIRES physics/Eos/EosMain/Helmholtz/SpeciesBased2
 REQUIRES Simulation/SimulationComposition
 REQUIRES Multispecies
 REQUIRES physics/sourceTerms/Burn/BurnMain/nuclearBurn/
