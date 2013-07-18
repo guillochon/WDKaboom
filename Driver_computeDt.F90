@@ -438,6 +438,11 @@ subroutine Driver_computeDt(nbegin, nstep, &
 
   ! limit the timestep to increase by at most a factor of dr_tstepChangeFactor
 
+  ! Added by JFG
+  ! The time-step is not allowed to drop below a certain fraction of hydroDt
+  dtNew = max(sim_hydroDtMult*hydroDt,dtNew)
+  ! End JFG
+
   dtNew = min( dtNew, dtOld*dr_tstepChangeFactor )
   
   if (nstep .GE. 50) then   !! This is where Cellular starts to fail
@@ -447,10 +452,6 @@ subroutine Driver_computeDt(nbegin, nstep, &
   ! Use dr_dtmin and dr_dtmax to limit the timestep.  If this makes the code
   ! unstable, it's not our fault.
   dtNew = min( max( dtNew, dr_dtMin ), dr_dtMax )
-
-  ! Added by JFG
-  dtNew = max(sim_hydroDtMult*hydroDt,dtNew)
-  ! End JFG
 
   if (printTStepLoc) then
          
