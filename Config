@@ -91,6 +91,7 @@ PARAMETER sim_critKine     REAL 0.0E0
 PARAMETER sim_dbleDetTemp  REAL 0.0E0
 PARAMETER sim_explodeCore  BOOLEAN false
 PARAMETER sim_detHeight    INTEGER 1
+PARAMETER sim_hydroDtMult  REAL 1.0E-2
 
 PARAMETER larget           REAL 1.0E10
 

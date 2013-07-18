@@ -60,4 +60,6 @@ module Simulation_data
 
   integer, save             :: sim_dynRefineMax
 
+  double precision, save    :: sim_hydroDtMult
+
 end module Simulation_data

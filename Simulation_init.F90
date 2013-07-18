@@ -97,6 +97,7 @@ subroutine Simulation_init()
     call RuntimeParameters_get('sim_dbleDetTemp',sim_dbleDetTemp)
     call RuntimeParameters_get('sim_explodeCore',sim_explodeCore)
     call RuntimeParameters_get('sim_detHeight',sim_detHeight)
+    call RuntimeParameters_get('sim_hydroDtMult',sim_hydroDtMult)
 
     if (sim_nSubZones .le. 1) sim_nSubZones = 2
 
