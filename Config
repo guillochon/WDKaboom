@@ -14,6 +14,7 @@ REQUIRES physics/Eos/EosMain/Helmholtz/SpeciesBased2
 REQUIRES Simulation/SimulationComposition
 REQUIRES Multispecies
 REQUIRES physics/sourceTerms/Burn/BurnMain/nuclearBurn/
+REQUIRES IO/IOMain/hdf5/parallel/PM
 #REQUIRES physics/sourceTerms/Cool
 REQUIRES flashUtilities/numericalRecipes
 
