@@ -1,2 +1,0 @@
-#define MODE_PRES_TEMP 108
-#define MODE_PRES_ENTR 109
