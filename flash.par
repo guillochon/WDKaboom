@@ -1,0 +1,151 @@
+# Sets variables that don't require a recompile.
+#Sets of initialization paramaters for each phase.
+#Only one set of these parameters should be uncommented.
+#Phase 1: Relaxation
+#checkpointFileIntervalTime = 10.0
+#tmax                       = 199.9
+#useBurn                    = .false.
+##restart                    = .true.
+##checkpointFileNumber       = 14
+#plotFileNumber             = 0
+#Phase 2a: Single detonation only
+#restart                    = .true.
+#checkpointFileNumber       = 39
+#plotFileNumber             = 0
+#checkpointFileIntervalTime = 0.1
+#tmax                       = 203.5
+#useBurn                    = .true.
+#sim_explodeCore            = .false.
+#Phase 2b: Double detonation
+#restart                    = .true.
+#checkpointFileNumber       = 62
+#plotFileNumber             = 0
+#checkpointFileIntervalTime = 0.1
+#tmax                       = 205.0
+#useBurn                    = .true.
+##sim_explodeCore            = .true.  #Use if not restarting this phase.
+#sim_explodeCore            = .false.  #Use if restarting this phase.
+#sim_critDens               = 1.0e7    #Set by hand, should use Ropke 2007 if possible.
+#sim_critKine               = 1.0e23   #Ditto.
+#sim_dbleDetTemp            = 2.1e9    #Should be derived from above kine.
+#Phase 3: Ejecta phase
+restart                    = .true.
+checkpointFileNumber       = 75
+plotFileNumber             = 0
+checkpointFileIntervalTime = 5.0
+tmax                       = 400.0
+useBurn                    = .true.
+sim_explodeCore            = .false.
+
+basenm                     = "wdkaboom_"
+wall_clock_checkpoint      = 28700.
+plotFileIntervalTime       = 1000.
+
+xmax                       = 6.4e11
+ymax                       = 6.4e11
+zmax                       = 6.4e11
+
+small                      = 1.e-10
+smalle                     = 1.e-10
+smallt                     = 1.e4
+smallu                     = 1.e-100
+smallx                     = 1.e-30
+smlrho                     = 1.e-10
+smallp                     = 1.e-10
+cfl                        = 0.8
+nriem                      = 10000
+dtinit                     = 1e-4
+dtmin                      = 1e-6
+
+eos_coulombAbort           = .false.
+eos_coulombMult            = 0.0
+eos_maxNewton              = 100000
+eos_tolerance              = 1.0e-4
+eos_larget                 = 1.0e11
+#eos_smallgamc              = 1.01
+#eos_largegamc              = 5.0
+eosmodeInit                = "dens_ie" 
+nend                       = 10000000
+tinitial                   = 0.
+wall_clock_time_limit      = 2419200.
+useBurn                    = .true.
+enucDtFactor               = 0.1
+
+eintSwitch                 = 1.0e-6
+sim_rhoAmbient             = 1.0e-5
+sim_tAmbient               = 5.0e6
+sim_nsubzones              = 3
+sim_xctr                   = 3.2e11
+sim_yctr                   = 3.2e11
+sim_zctr                   = 3.2e11
+sim_tSpinup                = 40.0
+sim_tRelax                 = 200.0
+sim_tExplode               = 200.0
+sim_relaxRate              = 0.98
+sim_accMass                = 1.9891e33
+sim_accTemp                = 5.0e5
+sim_torusMass              = 5.9673e31
+sim_virTemp                = 4.5e8
+sim_rotFac                 = 0.4e0
+sim_profileSubdiv          = 2.0e4
+sim_massAcc                = 1.0e-4
+sim_minProfDelta           = 1.0
+sim_maxProfDelta           = 0.0
+sim_rhoGuess               = 0.0
+sim_maxBlocks              = 80000
+sim_detDens                = 7.2e5
+sim_detTemp                = 1.0e9
+sim_detRadius              = 8.0e0
+sim_detHeight              = 2
+
+xl_boundary_type           = "diode"
+xr_boundary_type           = "diode"
+yl_boundary_type           = "diode"
+yr_boundary_type           = "diode"
+zl_boundary_type           = "diode"
+zr_boundary_type           = "diode"
+grav_boundary_type         = "isolated"
+mpole_lmax                 = 4
+
+plot_var_1                 = "dens"
+plot_var_2                 = "temp"
+plot_var_3                 = "velx"
+plot_var_4                 = "vely"
+plot_var_5                 = "velz"
+plot_var_6                 = "eint"
+plot_var_7                 = "pres"
+plot_var_8                 = "he4"
+plot_var_9                 = "c12"
+plot_var_10                = "o16"
+plot_var_11                = "ne20"
+plot_var_12                = "mg24"
+plot_var_13                = "si28"
+plot_var_14                = "s32"
+plot_var_15                = "ar36"
+plot_var_16                = "ca40"
+plot_var_17                = "ti44"
+plot_var_18                = "cr48"
+plot_var_19                = "fe52"
+plot_var_20                = "ni56"
+plot_var_21                = "enuc"
+plot_var_22                = "ecoo"
+
+lrefine_min                = 1
+lrefine_max                = 13
+refine_var_1               = "dens"
+refine_cutoff_1            = 1.0e-2
+derefine_cutoff_1          = 1.0e-3
+refine_filter_1            = 8
+refine_var_2               = "dens"
+refine_cutoff_2            = 1.0e0
+derefine_cutoff_2          = 1.0e-1
+refine_filter_2            = 10
+refine_var_3               = "dens"
+refine_cutoff_3            = 1.0e2
+derefine_cutoff_3          = 1.0e1
+refine_filter_3            = 12
+refine_var_4               = "dens"
+refine_cutoff_4            = 1.0e4
+derefine_cutoff_4          = 1.0e3
+refine_filter_4            = 13
+
